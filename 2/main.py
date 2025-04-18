@@ -274,9 +274,9 @@ class TSPApp:
         self.vertex_objects = []
         self.adj_matrix = []
 
-        width = 750
+        width = 950
         height = 350
-        p = 1  
+        p = 1
         w_min, w_max = 1, 10
 
         for i in range(n):
