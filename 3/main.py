@@ -631,40 +631,63 @@ class TSPApp:
         self.draw_path_in_bottom_canvas(best_path, best_cost)
         print(f"Метод: Муравьиный алгоритм | Вершин: {n} | Вес: {best_cost:.2f} | Время: {total_time:.4f} сек")
 
-    def ant_colony_tsp(self,num_ants,num_iters,alpha,beta,evap,Q):
-        n=len(self.adj_matrix)
-        tau=[[1.0]*n for _ in range(n)]
-        dist=self.adj_matrix
-        best_path=None;best_cost=math.inf
+    def ant_colony_tsp(self, num_ants, num_iters, alpha, beta, evap, Q):
+        n = len(self.adj_matrix)
+        tau = [[1.0] * n for _ in range(n)]
+        dist = self.adj_matrix
+        best_path = None
+        best_cost = math.inf
         for _ in range(num_iters):
-            all_paths=[];all_costs=[]
+            all_paths = []
+            all_costs = []
             for _ in range(num_ants):
-                start=random.randrange(n);visited={start};path=[start];curr=start;cost=0.0
-                while len(path)<n:
-                    probs=[];den=0.0
+                start = random.randrange(n)
+                visited = {start}
+                path = [start]
+                curr = start
+                cost = 0.0
+                while len(path) < n:
+                    probs = []
+                    den = 0.0
                     for j in range(n):
                         if j not in visited:
-                            t=tau[curr][j]**alpha;e=(1.0/dist[curr][j])**beta
-                            den+=t*e;probs.append((j,t*e))
-                    if den==0:break
-                    r=random.random();cum=0.0;next_v=None
-                    for j,v in probs:
-                        cum+=v/den
-                        if r<=cum:next_v=j;break
-                    if next_v is None:next_v=probs[-1][0]
-                    path.append(next_v);visited.add(next_v);cost+=dist[curr][next_v];curr=next_v
-                cost+=dist[curr][path[0]];path.append(path[0])
-                all_paths.append(path);all_costs.append(cost)
-                if cost<best_cost:best_cost=cost;best_path=path
+                            t = tau[curr][j] ** alpha
+                            e = (1.0 / dist[curr][j]) ** beta
+                            den += t*e
+                            probs.append((j, t*e))
+                    if den == 0:
+                        break
+                    r = random.random()
+                    cum = 0.0
+                    next_v = None
+                    for j, v in probs:
+                        cum += v / den
+                        if r <= cum:
+                            next_v = j
+                            break
+                    if next_v is None : next_v = probs[-1][0]
+                    path.append(next_v)
+                    visited.add(next_v)
+                    cost += dist[curr][next_v]
+                    curr = next_v
+                cost += dist[curr][path[0]]
+                path.append(path[0])
+                all_paths.append(path)
+                all_costs.append(cost)
+                if cost < best_cost:
+                    best_cost = cost
+                best_path = path
             # испарение
             for i in range(n):
-                for j in range(n):tau[i][j]*=(1-evap)
+                for j in range(n):
+                    tau[i][j] *= (1-evap)
             # депонирование
-            for path,cost in zip(all_paths,all_costs):
-                dQ=Q/cost
+            for path, cost in zip(all_paths,all_costs):
+                dQ = Q / cost
                 for k in range(len(path)-1):
-                    i,j=path[k],path[k+1];tau[i][j]+=dQ
-        return best_path,best_cost
+                    i , j = path[k], path[k+1]
+                    tau[i][j] += dQ
+        return best_path, best_cost
 
     # --- Элитные муравьи ---
     def run_elite_ant_colony(self):
@@ -684,44 +707,69 @@ class TSPApp:
         print(f"Метод: Элитные муравьи | Вершин: {n} | Вес: {best_cost:.2f} | Время: {total_time:.4f} сек")
 
     def elite_ant_colony_tsp(self,num_ants,num_iters,alpha,beta,evap,Q,elitist):
-        n=len(self.adj_matrix)
-        tau=[[1.0]*n for _ in range(n)]
-        dist=self.adj_matrix
-        best_path=None;best_cost=math.inf
+        n = len(self.adj_matrix)
+        tau = [[1.0] * n for _ in range(n)]
+        dist = self.adj_matrix
+        best_path = None
+        best_cost = math.inf
         for _ in range(num_iters):
-            all_paths=[];all_costs=[]
+            all_paths = []
+            all_costs = []
             for _ in range(num_ants):
-                start=random.randrange(n);visited={start};path=[start];curr=start;cost=0.0
-                while len(path)<n:
-                    probs=[];den=0.0
+                start = random.randrange(n)
+                visited = {start}
+                path = [start]
+                curr = start
+                cost = 0.0
+                while len(path) < n:
+                    probs = []
+                    den = 0.0
                     for j in range(n):
                         if j not in visited:
-                            t=tau[curr][j]**alpha;e=(1.0/dist[curr][j])**beta
-                            den+=t*e;probs.append((j,t*e))
-                    if den==0:break
-                    r=random.random();cum=0.0;next_v=None
-                    for j,v in probs:
-                        cum+=v/den
-                        if r<=cum:next_v=j;break
-                    if next_v is None:next_v=probs[-1][0]
-                    path.append(next_v);visited.add(next_v);cost+=dist[curr][next_v];curr=next_v
-                cost+=dist[curr][path[0]];path.append(path[0])
-                all_paths.append(path);all_costs.append(cost)
-                if cost<best_cost:best_cost=cost;best_path=path
+                            t = tau[curr][j] ** alpha
+                            e = (1.0 / dist[curr][j]) ** beta
+                            den += t * e
+                            probs.append((j, t * e))
+                    if den == 0:
+                        break
+                    r = random.random()
+                    cum = 0.0
+                    next_v = None
+                    for j, v in probs:
+                        cum += v / den
+                        if r <= cum:
+                            next_v = j
+                            break
+                    if next_v is None:
+                        next_v = probs[-1][0]
+                    path.append(next_v)
+                    visited.add(next_v)
+                    cost += dist[curr][next_v]
+                    curr = next_v
+                cost += dist[curr][path[0]]
+                path.append(path[0])
+                all_paths.append(path)
+                all_costs.append(cost)
+                if cost < best_cost:
+                    best_cost = cost
+                    best_path = path
             # испарение
             for i in range(n):
-                for j in range(n):tau[i][j]*=(1-evap)
+                for j in range(n):
+                    tau[i][j] *= (1 - evap)
             # депонирование обычное
-            for path,cost in zip(all_paths,all_costs):
-                dQ=Q/cost
-                for k in range(len(path)-1):
-                    i,j=path[k],path[k+1];tau[i][j]+=dQ
+            for path, cost in zip(all_paths, all_costs):
+                dQ = Q / cost
+                for k in range(len(path) - 1):
+                    i, j = path[k], path[k+1]
+                    tau[i][j] += dQ
             # депонирование элиты
             if best_path:
-                elit_deposit=elitist*(Q/best_cost)
-                for k in range(len(best_path)-1):
-                    i,j=best_path[k],best_path[k+1];tau[i][j]+=elit_deposit
-        return best_path,best_cost
+                elit_deposit = elitist * (Q / best_cost)
+                for k in range(len(best_path) - 1):
+                    i, j = best_path[k], best_path[k+1]
+                    tau[i][j] += elit_deposit
+        return best_path, best_cost
 
     def update_table(self):
         """Обновить таблицу графа (матрицу смежности) в виджете table_label."""
