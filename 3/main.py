@@ -302,6 +302,28 @@ class TSPApp:
 
         self.draw_graph_on_top_canvas()
 
+    def generate_graph(self, num_vertices):
+        """Генерирует случайный полный граф с заданным количеством вершин"""
+        self.clear_all()  # Очищаем текущий граф
+    
+        width = 950
+        height = 350
+    
+        # Генерируем случайные позиции вершин
+        for _ in range(num_vertices):
+            x = random.randint(50, width - 50)
+            y = random.randint(50, height - 50)
+            self.add_vertex(x, y)
+        
+        # Создаем полную матрицу смежности со случайными весами
+        n = len(self.vertex_positions)
+        for i in range(n):
+            for j in range(n):
+                if i != j:
+                    self.adj_matrix[i][j] = float(random.randint(1, 100))
+        
+        self.draw_graph_on_top_canvas()
+
     # ---------------------------------------------------------------------
     #                     КНОПКА «СТЕРЕТЬ ВСЁ»
     # ---------------------------------------------------------------------
@@ -386,8 +408,8 @@ class TSPApp:
             messagebox.showinfo("Результат", "Не удалось найти гамильтонов цикл.")
         else:
             self.draw_path_in_bottom_canvas(best_path, best_cost)
-            print(f"Алгоритм: Ближайший сосед\nВершин: {n}\nДлина цикла: {best_cost:.2f}\nВремя выполнения: {total_time:.4f} сек\n")
-
+            print(f"Алгоритм: Ближайший сосед      | Вершин: {n} | Длина цикла: {best_cost:.2f} | Время: {total_time:.4f} сек")
+  
     def nearest_neighbor_tsp(self, start):
         n = len(self.adj_matrix)
         visited = [False] * n
@@ -437,7 +459,7 @@ class TSPApp:
             messagebox.showinfo("Результат", "Не удалось найти гамильтонов цикл.")
         else:
             self.draw_path_in_bottom_canvas(best_path, best_cost)
-            print(f"Алгоритм: Модифицированный ближайший сосед\nВершин: {n}\nДлина цикла: {best_cost:.2f}\nВремя выполнения: {total_time:.4f} сек\n")
+            print(f"Алгоритм: Мод. ближайший сосед | Вершин: {n} | Длина цикла: {best_cost:.2f} | Время: {total_time:.4f} сек")
 
     def nearest_neighbor_tsp_modified(self, start, epsilon=0.1):
         n = len(self.adj_matrix)
@@ -554,7 +576,8 @@ class TSPApp:
         current_path.append(current_path[0])
         self.draw_path_in_bottom_canvas(current_path, current_cost)
         total_time = time.time() - start_time
-        print(f"Алгоритм: Имитация отжига\nВершин: {n}\nДлина цикла: {current_cost:.2f}\nВремя выполнения: {total_time:.4f} сек\n")
+        print(f"Алгоритм: Имитация отжига      | Вершин: {n} | Длина цикла: {current_cost:.2f} | Время: {total_time:.4f} сек")
+                          
         
     def run_fast_simulated_annealing(self):
         def total_distance(path):
@@ -611,7 +634,7 @@ class TSPApp:
         current_path.append(current_path[0])
         self.draw_path_in_bottom_canvas(current_path, current_cost)
         total_time = time.time() - start_time
-        print(f"Алгоритм: Сверхбыстрый отжиг\nВершин: {n}\nДлина цикла: {current_cost:.2f}\nВремя выполнения: {total_time:.4f} сек\n")
+        print(f"Алгоритм: Сверхбыстрый отжиг   | Вершин: {n} | Длина цикла: {current_cost:.2f} | Время: {total_time:.4f} сек")
 
     # ---------------------- Муравьиный алгоритм ----------------------
     # --- Муравьиный алгоритм ---
@@ -629,7 +652,7 @@ class TSPApp:
         best_path, best_cost = self.ant_colony_tsp(num_ants=n, num_iters=100, alpha=1.0, beta=2.0, evap=0.5, Q=100.0)
         total_time = time.time() - start_time
         self.draw_path_in_bottom_canvas(best_path, best_cost)
-        print(f"Метод: Муравьиный алгоритм | Вершин: {n} | Вес: {best_cost:.2f} | Время: {total_time:.4f} сек")
+        print(f"Алгоритм: Муравьиный алгоритм  | Вершин: {n} | Длина цикла: {best_cost:.2f} | Время: {total_time:.4f} сек") 
 
     def ant_colony_tsp(self,num_ants,num_iters,alpha,beta,evap,Q):
         n=len(self.adj_matrix)
@@ -681,7 +704,7 @@ class TSPApp:
         best_path, best_cost = self.elite_ant_colony_tsp(num_ants=n, num_iters=100, alpha=1.0, beta=2.0, evap=0.5, Q=100.0, elitist=5)
         total_time = time.time() - start_time
         self.draw_path_in_bottom_canvas(best_path, best_cost)
-        print(f"Метод: Элитные муравьи | Вершин: {n} | Вес: {best_cost:.2f} | Время: {total_time:.4f} сек")
+        print(f"Алгоритм: Элитные муравьи      | Вершин: {n} | Длина цикла: {best_cost:.2f} | Время: {total_time:.4f} сек") 
 
     def elite_ant_colony_tsp(self,num_ants,num_iters,alpha,beta,evap,Q,elitist):
         n=len(self.adj_matrix)
@@ -734,10 +757,35 @@ class TSPApp:
             table_str += row_str
         self.table_label.config(text=table_str)
 
+def test():
+    v = [10, 30, 50, 100]
+    for i in v:
+        temp_root = tk.Tk()
+        temp_root.withdraw()  
+        app = TSPApp(temp_root)
+        app.generate_graph(i)
+
+        algorithms = [
+            ("Ближайший сосед", app.run_tsp),
+            ("Мод. ближайший сосед", app.run_tsp_modified),
+            ("Имитация отжига", app.run_simulated_annealing),
+            ("Сверхбыстрый отжиг", app.run_fast_simulated_annealing),
+            ("Муравьиный алгоритм", app.run_ant_colony),
+            ("Элитные муравьи", app.run_elite_ant_colony)
+        ]
+        
+        for name, algorithm in algorithms:
+            algorithm()
+
+        print()
+            
+        temp_root.destroy()
+
 def main():
-    root = tk.Tk()
-    app = TSPApp(root)
-    root.mainloop()
+    test()
+    #root = tk.Tk()
+    #app = TSPApp(root)
+    #root.mainloop()
 
 if __name__ == "__main__":
     main()
