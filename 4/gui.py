@@ -132,7 +132,7 @@ def gui_mode():
                 self.table.setRowCount(0)
                 self.table.setColumnCount(0)
                 return
-            N = min(30, len(df))
+            N = min(50, len(df))
             self.table.setColumnCount(len(df.columns))
             self.table.setRowCount(N)
             self.table.setHorizontalHeaderLabels(df.columns)
