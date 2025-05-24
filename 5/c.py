@@ -17,8 +17,8 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 import matplotlib.pyplot as plt
 
 # Параметры
-N_SAMPLES = 100         # Можно изменить, чтобы не было слишком долгих вычислений
-N_FEATURES = 15         # Сколько признаков оставить (можно поменять на любое число <= 54)
+N_SAMPLES = 100
+N_FEATURES = 15
 
 data = fetch_covtype()
 X_full = pd.DataFrame(data.data[:N_SAMPLES], columns=data.feature_names)
@@ -127,6 +127,17 @@ class ClusterApp(QWidget):
         features_layout.addWidget(self.feature_spin)
         self.layout.addLayout(features_layout)
 
+        # --- Настройка числа отбираемых признаков (ещё один SpinBox) ---
+        select_feats_layout = QHBoxLayout()
+        self.selected_features_spin = QSpinBox()
+        self.selected_features_spin.setMinimum(1)
+        self.selected_features_spin.setMaximum(X_full.shape[1])
+        self.selected_features_spin.setValue(5)
+        self.selected_features_spin.setFont(QFont("Arial", 13))
+        select_feats_layout.addWidget(QLabel("Число отбираемых признаков (Add):"))
+        select_feats_layout.addWidget(self.selected_features_spin)
+        self.layout.addLayout(select_feats_layout)
+
         # --- История действий (QPlainTextEdit, только для чтения) ---
         self.history = QPlainTextEdit()
         self.history.setReadOnly(True)
@@ -143,6 +154,7 @@ class ClusterApp(QWidget):
         self.anonymized = False
         self.labels = None
         self.n_clusters = 7
+        self.n_selected_features = self.selected_features_spin.value()
         self.X_orig = X_full_scaled.copy()
 
         # Способ анонимизации ('shuffle_columns' или 'shuffle_within_columns')
@@ -157,6 +169,7 @@ class ClusterApp(QWidget):
         self.btn_cluster_anon.clicked.connect(self.cluster_anonymized)
         self.btn_visualize.clicked.connect(self.visualize)
         self.feature_spin.valueChanged.connect(self.change_features)
+        self.selected_features_spin.valueChanged.connect(self.change_n_selected_features)
 
     def center_window(self):
         qr = self.frameGeometry()
@@ -179,8 +192,16 @@ class ClusterApp(QWidget):
         self.anonymized = False
         self.labels = None
         self.anonymization_mode = None
+        self.selected_features_spin.setMaximum(n)
+        if self.n_selected_features > n:
+            self.selected_features_spin.setValue(n)
+            self.n_selected_features = n
         self.info.setText(f"Загружено записей: {X_full.shape[0]}\nПризнаков: {X_full.shape[1]}")
         self.log(f"Обновлено количество признаков: {n}. Данные пересчитаны.")
+
+    def change_n_selected_features(self):
+        self.n_selected_features = self.selected_features_spin.value()
+        self.log(f"Обновлено число отбираемых признаков методом Add: {self.n_selected_features}")
 
     def cluster_full(self):
         self.log("Кластеризация (все признаки)...")
@@ -190,9 +211,11 @@ class ClusterApp(QWidget):
         self.log(f"Rand index (все признаки): {score:.4f}")
 
     def select_features(self):
-        self.log("Отбор признаков методом Add...")
+        self.log(f"Отбор признаков методом Add ({self.n_selected_features})...")
         QApplication.processEvents()
-        self.selected_features = select_features_additive(self.X, self.y, n_features=5, n_clusters=self.n_clusters)
+        self.selected_features = select_features_additive(
+            self.X, self.y, n_features=self.n_selected_features, n_clusters=self.n_clusters
+        )
         feats = ", ".join([str(f) for f in self.selected_features])
         self.log(f"Отобрано признаков: {feats}")
 
